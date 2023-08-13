@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@aave/protocol-v2": "^1.0.1",
-    "@openzeppelin/contracts": "^4.9.3"
+    "@openzeppelin/contracts": "^4.9.3",
+    "@pinata/sdk": "^2.1.0"
   }
 }
