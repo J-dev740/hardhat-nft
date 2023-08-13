@@ -1,21 +1,45 @@
 const {ethers,network} = require('hardhat')
 const {networkConfig,developmentChains}=require('../helper-hardhat-config')
+const {storeImages,storeTokenMetaData}= require('../utils/uploadToPinata')
+const { Indexed } = require('ethers')
+require('dotenv').config()
+
+const pathToImage="./images/RandomIpfsNft/"
+const sub_fund_amount= ethers.parseEther("6")
+const metadataTemplate={
+    name:"",
+    description:"",
+    image:"",
+    attributes:[
+        {
+            trait_type:"cuteness",
+            value:100,
+
+        }
+
+    ]
+
+
+}
+
+
 
 module.exports= async({getNamedAccounts,deployments})=>{
     const accounts= await ethers.getSigners()
     const deployer= accounts[0].address
-    const chainId= network.chainId
+    const chainId= network.config.chainId
     const{deploy,log,get}=deployments
 
     let vrfCoordinatorV2Address,subId
     //vrf parameters initialization
-    const sub_fund_amount= ethers.parseEther("6")
-    const keyhash=networkConfig[chainId]["gasLane"]
+    const keyhash=networkConfig[chainId]["gaslane"]
     const callBackGasLimit=networkConfig[chainId]["callbackGasLimit"]
     if(developmentChains.includes(network.name)){
-        const vrfCoordinatorV2Mock= await get("VRFCoordinatorV2Mock")
-         vrfCoordinatorV2Address= vrfCoordinatorV2Mock.address
-         await vrfCoordinatorV2Mock.createSubscription()
+        const vrfCoordinatorV2= await get("VRFCoordinatorV2Mock")
+         vrfCoordinatorV2Address= vrfCoordinatorV2.address
+         const vrfCoordinatorV2Mock=await ethers.getContractAt("VRFCoordinatorV2Mock",vrfCoordinatorV2Address)
+         const tx=await vrfCoordinatorV2Mock.createSubscription()
+         await tx.wait(1)
          log('mock sub created...')
          subId= await vrfCoordinatorV2Mock.getSubId()
          await vrfCoordinatorV2Mock.fundSubscription(subId,sub_fund_amount)
@@ -26,27 +50,65 @@ module.exports= async({getNamedAccounts,deployments})=>{
         subId= networkConfig[chainId]["subscriptionId"]
     }
 
-    let dogTokenUris=[]
     //nft parameters initialization
     const mintFee=networkConfig[chainId]["mintFee"]
-    if(process.env.UPLOAD_T0_PINATA=="true"){
-        dogTokenUris= await handleTokenUris()
+    let dogTokenUris=[
+        'ipfs://QmQs4yASJakykKzcUYiJoQEFptCuufghNA3S5J2CkD47tp',
+        'ipfs://QmXry9jwWVKfbt6V87Gzd97WJ5LGAmtyWY7znSQXCRysv9',
+        'ipfs://QmX5V7Xc31vMfM8tYgrNefix1WCFmiMqpLzjDtk6PgTQd2'
+    ]
+
+    console.log("handling upload...")
+
+
+    try {
+        
+        if(process.env.UPLOAD_TO_PINATA=="true"){
+            dogTokenUris= await handleTokenUris()
+            console.log('got token uriss....')
+        }
+    } catch (error) {
+        console.log(error)
     }
+    console.log('deploying the RandomIpfsNft smart contract...')
+    const Args=[vrfCoordinatorV2Address,keyhash,subId,callBackGasLimit,mintFee,dogTokenUris]
+    const RandomIpfsNft= await  deploy("RandomIpfs",{
+        from:deployer,
+        args:Args,
+        log:true,
+        waitConfirmations:network.config.BlockConfirmations||1,
+    })
 
-    // const Args=[vrfCoordinatorV2Address,keyhash,subId,callBackGasLimit,mintFee,dogTokenUris]
-    // const RandomIpfsNft= await  deploy("RandomIpfsNft",{
-    //     from:deployer,
-    //     args:Args,
-    //     log:true,
-    //     waitConfirmations:network.config.BlockConfirmations||1,
-    // }
-
+    log('-------------------------------->')
+    console.log("deployed at")
+    console.log(RandomIpfsNft.address)
+    log('--------------------------------->')
     
     
 }
 async function handleTokenUris(){
+    let dogTokenUris=[]
     //1. upload image to pinata 
-    //
+        
+        const {responses:imageResponseUris, files}= await storeImages(pathToImage)
+        console.log(files)
+        console.log(imageResponseUris)
+
+        for( let Index in imageResponseUris){
+            let dogMetaData={...metadataTemplate}
+            dogMetaData.name=files[Index].replace('.png','')
+            dogMetaData.description=`An adorable ${dogMetaData.name} pup!`
+            dogMetaData.image=`ipfs://${imageResponseUris[Index].IpfsHash}`
+            console.log(`uploading dogMetadata for ${dogMetaData.name}...`)
+            const metadataResponse= await storeTokenMetaData(dogMetaData)
+            dogTokenUris.push(`ipfs://${metadataResponse.IpfsHash}`)
+
+        }
+        console.log('tokenUris uploaded they are....')
+        console.log(dogTokenUris)
+
+    console.log('-------------------->')
+    return dogTokenUris
 }
 
 module.exports.tags=["all","RandomIpfs"]
