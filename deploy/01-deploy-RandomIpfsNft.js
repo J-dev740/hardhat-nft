@@ -26,24 +26,27 @@ const metadataTemplate={
 
 module.exports= async({getNamedAccounts,deployments})=>{
     const accounts= await ethers.getSigners()
-    const deployer= accounts[0].address
+    const account =accounts[0].address
+    const deployer= await ethers.getSigner(account)
+    const deployer_address= await deployer.getAddress()
     const chainId= network.config.chainId
     const{deploy,log,get}=deployments
 
-    let vrfCoordinatorV2Address,subId
+    let vrfCoordinatorV2Address,subId,vrfCoordinatorV2Mock
     //vrf parameters initialization
     const keyhash=networkConfig[chainId]["gaslane"]
     const callBackGasLimit=networkConfig[chainId]["callbackGasLimit"]
     if(developmentChains.includes(network.name)){
         const vrfCoordinatorV2= await get("VRFCoordinatorV2Mock")
          vrfCoordinatorV2Address= vrfCoordinatorV2.address
-         const vrfCoordinatorV2Mock=await ethers.getContractAt("VRFCoordinatorV2Mock",vrfCoordinatorV2Address)
+          vrfCoordinatorV2Mock=await ethers.getContractAt("VRFCoordinatorV2Mock",vrfCoordinatorV2Address,deployer)
          const tx=await vrfCoordinatorV2Mock.createSubscription()
          await tx.wait(1)
          log('mock sub created...')
          subId= await vrfCoordinatorV2Mock.getSubId()
          await vrfCoordinatorV2Mock.fundSubscription(subId,sub_fund_amount)
          log('mock sub funded...')
+
     }
     else{
         vrfCoordinatorV2Address=networkConfig[chainId]['vrfCoordinatorV2']
@@ -64,6 +67,7 @@ module.exports= async({getNamedAccounts,deployments})=>{
     try {
         
         if(process.env.UPLOAD_TO_PINATA=="true"){
+            console.log('calling handleTokenUris... ')
             dogTokenUris= await handleTokenUris()
             console.log('got token uriss....')
         }
@@ -73,16 +77,19 @@ module.exports= async({getNamedAccounts,deployments})=>{
     console.log('deploying the RandomIpfsNft smart contract...')
     const Args=[vrfCoordinatorV2Address,keyhash,subId,callBackGasLimit,mintFee,dogTokenUris]
     const RandomIpfsNft= await  deploy("RandomIpfs",{
-        from:deployer,
+        from:deployer_address,
         args:Args,
         log:true,
         waitConfirmations:network.config.BlockConfirmations||1,
     })
 
-    log('-------------------------------->')
+    console.log('-------------------------------->')
     console.log("deployed at")
     console.log(RandomIpfsNft.address)
-    log('--------------------------------->')
+    console.log('--------------------------------->')
+    console.log('adding consumer.....')
+    await vrfCoordinatorV2Mock.addConsumer(subId,RandomIpfsNft.address)
+    console.log('consumer Added...')
     
     
 }

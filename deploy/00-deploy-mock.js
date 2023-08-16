@@ -8,15 +8,18 @@ const GAS_PRICE_LINK=1e9// it is a calculated value based on eth price ie if pri
 module.exports=async({getNamedAccounts,deployments})=>{
     const{deploy,log}= deployments
     const accounts = await ethers.getSigners()
+    const account = accounts[0].address
     //accounts[0] returns the first object then we have to specify the .address specifically
-    const deployer=accounts[0].address
+    const deployer=await ethers.getSigner(account)
+    const deployer_address= await deployer.getAddress()
+    // console.log(deployer_address)
     // const{deployer}=await getNamedAccounts()
     const networkName=network.name
     const args=[BASE_FEE,GAS_PRICE_LINK]
     if(developmentChains.includes(networkName)){
         log("local networks detected!..deploying Mocks\n")
         await deploy("VRFCoordinatorV2Mock",{
-            from:deployer,
+            from:deployer_address,
             args:args,
             log:true,
 

@@ -6,7 +6,7 @@ const pinataSDK= require("@pinata/sdk")
 const API_KEY=process.env.API_KEY||""
 const SECRET=process.env.SECRET||""
 
-    
+    console.log("initializing pinataSDk....")
     const pinata=new pinataSDK('70975fa2c0ceba218929','a6e65d7abe879dd2367379404bbdb8163a238744c982ba6f49ea68bf5d223f09');
     pinata.testAuthentication()
     .then((result)=>{

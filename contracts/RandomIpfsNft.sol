@@ -26,6 +26,7 @@ contract RandomIpfs is ERC721URIStorage,VRFConsumerBaseV2,Ownable{
     VRFCoordinatorV2Interface private immutable i_vrfCoordinator;
     bytes32 private immutable  i_keyHash;//gas lane value
     uint64 private immutable i_subId;
+    uint256 private reqId;
     uint16 private constant REQ_CONF=3;//min request confirmations before respondance of vrf service 
     uint32 private immutable i_callbackGasLimit;//max gas that can be utilized in fulfillRandomWords function
     uint32 private constant NUM_WORDS=1;//no of random words returned per request
@@ -64,15 +65,16 @@ contract RandomIpfs is ERC721URIStorage,VRFConsumerBaseV2,Ownable{
 
 
 
-    function requestNft() public payable  returns (uint256 requestId){
+    function requestNft() public payable  returns (uint256){
         if(msg.value< i_mintFee) revert RandomIpfsNft_NeedMoreEth();
 
-         requestId=i_vrfCoordinator.requestRandomWords(i_keyHash, i_subId, REQ_CONF, i_callbackGasLimit, NUM_WORDS);
-         s_requestIdToSender[requestId]=msg.sender;
-         emit NftRequested(requestId, msg.sender);
+         reqId=i_vrfCoordinator.requestRandomWords(i_keyHash, i_subId, REQ_CONF, i_callbackGasLimit, NUM_WORDS);
+         s_requestIdToSender[reqId]=msg.sender;
+         emit NftRequested(reqId, msg.sender);
+         return reqId;
 
     }
-
+    //this funfillRandomWords is actually overriden from the vrfConsumerBasev2 contract and only vrfCoordinator contract can call this contract through it's full fill Randomwords function
     function fulfillRandomWords(uint256 requestId , uint256[] memory randomWords) internal override {
 
         address dogOwner = s_requestIdToSender[requestId];
@@ -136,6 +138,10 @@ contract RandomIpfs is ERC721URIStorage,VRFConsumerBaseV2,Ownable{
 
     function getInitialized() public view returns (bool){
         return s_initialized;
+    }
+
+    function getRequestId() public view returns( uint256 ){
+        return reqId;
     }
 
     

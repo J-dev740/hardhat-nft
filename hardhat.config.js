@@ -18,10 +18,10 @@ module.exports = {
   networks:{
     hardhat:{
       chainId:31337,
-      forking:{
-        // url:MAINNET_RPC_URL,
-        url:"https://eth-mainnet.g.alchemy.com/v2/bUv0Ec-2sgK-i_kLmA1KJGZQuNvSYnqb"
-      },
+      // forking:{
+      //   // url:MAINNET_RPC_URL,
+      //   url:"https://eth-mainnet.g.alchemy.com/v2/bUv0Ec-2sgK-i_kLmA1KJGZQuNvSYnqb"
+      // },
     },
     sepolia:{
       url:RPC_URL,
@@ -61,6 +61,6 @@ module.exports = {
     ]
     },
   mocha:{
-    timeout:400000,
+    timeout:200000,
   },
 };
