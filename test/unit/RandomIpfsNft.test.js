@@ -3,6 +3,9 @@ const {getNamedAccounts,deployments,ethers,network,provider}=require("hardhat")
 const {networkConfig,developmentChains}=require("../../helper-hardhat-config")
 const { randomBytes } = require("ethers")
 
+!developmentChains.includes(network.name)
+? describe.skip()
+:
 describe("RandomIpfsNft",()=>{
 
     let RandomIpfsNft,deployer,VrfCoordinatorV2Mock,RIN_address
