@@ -109,5 +109,32 @@ describe("RandomIpfsNft",()=>{
         })
     })
 
+    describe('getBreedFromModdedRng', () => { 
+        it("should return pug for ModdedRng<10",async ()=>{
+            //we can expect breed value and not txresponse since it is a pure function and does not change the state of the blockchain
+            const expectedValue= await RandomIpfsNft.getBreedFromModdedRng(9)
+            assert(expectedValue==0)
+
+        })
+        it("should return shibaInu  for ModdedRng10-39",async ()=>{
+            //we can expect breed value and not txresponse since it is a pure function and does not change the state of the blockchain
+            const expectedValue= await RandomIpfsNft.getBreedFromModdedRng(11)
+            assert(expectedValue==1)
+
+        })
+        it("should return pug for ModdedRng 40-99",async ()=>{
+            //we can expect breed value and not txresponse since it is a pure function and does not change the state of the blockchain
+            const expectedValue= await RandomIpfsNft.getBreedFromModdedRng(42)
+            assert(expectedValue==2)
+
+        })
+        it("should revert  for ModdedRng>100",async ()=>{
+            //we can expect breed value and not txresponse since it is a pure function and does not change the state of the blockchain
+        await expect (RandomIpfsNft.getBreedFromModdedRng(101)).to.be.reverted
+         
+
+        })
+     })
+
 
 })
