@@ -87,9 +87,12 @@ module.exports= async({getNamedAccounts,deployments})=>{
     console.log("deployed at")
     console.log(RandomIpfsNft.address)
     console.log('--------------------------------->')
-    console.log('adding consumer.....')
-    await vrfCoordinatorV2Mock.addConsumer(subId,RandomIpfsNft.address)
-    console.log('consumer Added...')
+    if(developmentChains.includes(network.name)){
+        console.log('adding consumer.....')
+        await vrfCoordinatorV2Mock.addConsumer(subId,RandomIpfsNft.address)
+        console.log('consumer Added...')
+    }
+
     
     
 }
