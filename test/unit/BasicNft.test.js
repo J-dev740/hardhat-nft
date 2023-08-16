@@ -9,11 +9,12 @@ const { randomBytes } = require("ethers")
 :
 describe("basicNft Unit test",()=>{
     
-let BasicNft,deployer
+let BasicNft,deployer,deployer_address
     beforeEach("",async()=>{
         const accounts= await ethers.getSigners()
         const account= accounts[0].address
         deployer = await ethers.getSigner(account)
+        deployer_address= deployer.getAddress()
         deployments.fixture("all")
         const BN= await deployments.get("BasicNft")
         const BN_address= BN.address
@@ -41,6 +42,14 @@ let BasicNft,deployer
         it("should increment the token counter by one",async ()=>{
             const tokenCounter= await BasicNft.getTokenCounter()
             assert(tokenCounter.toString()=="1")
+        })
+        it("shows the correct Balance of the and Owner of Nft",async ()=>{
+
+            const deployerBalance = await BasicNft.balanceOf(deployer_address)
+            const owner = await BasicNft.OwnerOf("0")
+            assert.equal(deployerBalance.toString(),"1")
+            assert.equal( owner,deployer_address)
+
         })
     })
 })
