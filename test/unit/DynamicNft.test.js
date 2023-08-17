@@ -44,5 +44,24 @@ let deployer,DynamicNft,PriceFeedMock
             assert(tokenUri.includes(highImageUri))
 
         })
+
+        it ("should return imageUri for LowSvg when price is lower than highValue",async()=>{
+            const highValue=ethers.parseEther("10")
+            const price =ethers.parseEther("5")
+            console.log("updating the price value of mockAggregator...")
+          const tx=  await PriceFeedMock.updateAnswer(price)
+        //   await tx.wait(1)
+
+            await DynamicNft.mintNft(highValue)
+            const tokenCounter= await DynamicNft.getTokenCounter()
+            // assert.equal(tokenCounter,"1")
+            const tokenUri= await DynamicNft.tokenURI(0)
+            // await tokenUri.wait(1)
+            const lowImageUri= await DynamicNft.getLowSvg()
+
+            assert(tokenUri.includes(lowImageUri))
+            
+
+        })
     })
 })
