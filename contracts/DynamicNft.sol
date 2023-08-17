@@ -65,7 +65,7 @@ uint256 private s_tokenCounter;
         if(price>=s_tokenIdToHighValues[tokenId]){
             imageURI=s_highImageUri;
         }
-        return string(abi.encodePacked(_baseURI(),string(bytes(abi.encodePacked('{"name":"',name(),'","description":"An nft that changes based on chainLinkk priceFeed","attributes":[{"traitType":"coolness"},{"value":100}],"image":"',imageURI,'"}')))));
+        return string(abi.encodePacked(_baseURI(),Base64.encode(bytes(abi.encodePacked('{"name":"',name(),'","description":"An nft that changes based on chainLinkk priceFeed","attributes":[{"traitType":"coolness"},{"value":100}],"image":"',imageURI,'"}')))));
     }
 
     function getTokenCounter() public view returns( uint256){
