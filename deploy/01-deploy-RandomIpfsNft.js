@@ -120,4 +120,4 @@ async function handleTokenUris(){
     return dogTokenUris
 }
 
-module.exports.tags=["all","RandomIpfs"]
+module.exports.tags=["all","RandomIpfs","main"]
