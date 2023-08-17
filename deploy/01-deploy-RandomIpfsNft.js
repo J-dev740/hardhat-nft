@@ -1,7 +1,6 @@
 const {ethers,network} = require('hardhat')
 const {networkConfig,developmentChains}=require('../helper-hardhat-config')
 const {storeImages,storeTokenMetaData}= require('../utils/uploadToPinata')
-const { Indexed } = require('ethers')
 require('dotenv').config()
 
 const pathToImage="./images/RandomIpfsNft/"

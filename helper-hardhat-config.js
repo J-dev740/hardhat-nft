@@ -9,7 +9,8 @@ const networkConfig={
         callbackGasLimit:"2300000",
         interval:"30",
         gaslane:"0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c",
-        mintFee:`${ethers.parseEther("0.02")}`
+        mintFee:`${ethers.parseEther("0.02")}`,
+        ethUsdAddress:"0x694AA1769357215DE4FAC081bf1f309aDC325306"
         //change this Id when you create id in chainlink ui and get and actual Id
 
     },
@@ -24,8 +25,13 @@ const networkConfig={
 
 }
 
+const DECIMALS="18"
+const INITIAL_PRICE="200000000000000000000"
+
 const developmentChains=["hardhat","localhost"]
  module.exports={
+    DECIMALS,
+    INITIAL_PRICE,
     networkConfig,
     developmentChains,
  }
