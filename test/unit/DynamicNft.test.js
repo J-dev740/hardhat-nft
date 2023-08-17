@@ -32,4 +32,17 @@ let deployer,DynamicNft,PriceFeedMock
             assert(lowImageUri.includes("data:image/svg+xml;base64,"))
         })
     })
+
+    describe("DN-mintNft",()=>{
+        it ("should emit an event and set tokenUri based on highValue",async ()=>{
+            const highValue=  ethers.parseEther("1")
+            await expect( DynamicNft.mintNft(highValue)).to.emit(DynamicNft,"CreatedNft")
+            const tokenCounter= await DynamicNft.getTokenCounter()
+            assert.equal(tokenCounter,"1")
+            const highImageUri= await DynamicNft.getHighSvg()
+            const tokenUri= await DynamicNft.tokenURI(0)
+            assert(tokenUri.includes(highImageUri))
+
+        })
+    })
 })
